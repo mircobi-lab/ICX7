@@ -62,7 +62,7 @@ add_dependencies(icx7_engine icx7_engine_build)
 
 # librerie di sistema richieste dalla libreria standard di Rust
 if(WIN32)
-    set_property(TARGET icx7_engine PROPERTY INTERFACE_LINK_LIBRARIES kernel32 advapi32 ntdll userenv ws2_32 dbghelp bcrypt)
+    set_property(TARGET icx7_engine PROPERTY INTERFACE_LINK_LIBRARIES kernel32 advapi32 ntdll userenv ws2_32 dbghelp bcrypt synchronization)
 elseif(APPLE)
     set_property(TARGET icx7_engine PROPERTY INTERFACE_LINK_LIBRARIES "-framework CoreFoundation" iconv)
 else()
