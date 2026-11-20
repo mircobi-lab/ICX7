@@ -32,6 +32,7 @@ xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/"MBStudio91 ICX7.vs
 - LOAD SYX: banchi da 32 voci o voci singole DX7; SAVE BANK e SAVE VOICE scrivono SysEx compatibili DX7/Dexed
 - STORE: memorizza la voce modificata nel banco USER (salvato insieme al progetto del DAW)
 - PANIC: spegne subito tutte le note (senza coda), sustain, pitch bend, modulazione, chorus e riverbero; lo fa anche il CC 120 All Sound Off
+- MIDI LEARN su ogni controllo (clic destro, oppure tasto LEARN e clic sul controllo) con soft takeover, encoder relativi, tasti commuta/momentanei; profili pronti nel menu CONTROLLER (Novation Launch Control XL / XL 3, Launchkey, AKAI APC40 mkII, MPK mini mk3, M-Audio Oxygen, Ableton Push 2); mappa salvata nel progetto o come predefinita
 - ricezione MIDI di Program Change e di SysEx DX7 (banco o voce singola)
 - mod wheel, breath (CC2), foot (CC4) e aftertouch sulla modulazione LFO; sustain; pitch bend (BEND 0-12 semitoni, anche via RPN 0)
 - uscita con VOLUME, CHORUS stereo e REVERB (spenti per default: suono "puro" del motore)

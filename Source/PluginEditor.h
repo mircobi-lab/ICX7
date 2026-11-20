@@ -56,6 +56,8 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> waveAtt;
     mbstudio::ui::LedMeter meter { 12 };
     juce::MidiKeyboardComponent keyboard;
+    mbstudio::midi::MidiControls midiButtons;
+    mbstudio::midi::MidiLearnOverlay midiOverlay;
     std::unique_ptr<juce::FileChooser> chooser;
 
     juce::Rectangle<int> displayArea, algArea, pegArea, opHeaderArea;

@@ -80,8 +80,14 @@ juce::AudioProcessorValueTreeState::ParameterLayout createLayout()
 // ================================================================================================ processore
 ICX7Processor::ICX7Processor()
     : AudioProcessor (BusesProperties().withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
-      state (*this, nullptr, "ICX7", createLayout())
+      state (*this, nullptr, "ICX7", createLayout()),
+      midiMap (*this, "ICX7")
 {
+    // banchi per i profili dei controller: A manopole principali, B seconda riga, C fader, D extra
+    midiMap.setBanks ({ juce::StringArray { "op1_ol", "op2_ol", "op3_ol", "op4_ol", "op5_ol", "op6_ol", "fb", "alg" },
+                        juce::StringArray { "lfs", "lfd", "lpmd", "lamd", "pms", "trnsp", "chorus", "reverb" },
+                        juce::StringArray { "op1_r1", "op2_r1", "op3_r1", "op4_r1", "op5_r1", "op6_r1", "volume", "bend" },
+                        juce::StringArray { "op1_r4", "op2_r4", "op3_r4", "op4_r4", "op5_r4", "op6_r4", "op1_kvs", "op2_kvs" } });
     for (auto& d : voiceParams())
     {
         byteParam[(size_t) d.byte] = state.getRawParameterValue (d.id);
@@ -146,6 +152,7 @@ void ICX7Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     const int numSamples = buffer.getNumSamples();
     buffer.clear();
     keyboardState.processNextMidiBuffer (midi, 0, numSamples, true);
+    midiMap.process (midi);
 
     if (panicRequested.exchange (false))
     {
@@ -418,6 +425,7 @@ void ICX7Processor::getStateInformation (juce::MemoryBlock& dest)
     tree.setProperty ("program", currentProgram, nullptr);
     tree.setProperty ("voiceName", voiceNameStr, nullptr);
     tree.setProperty ("edited", edited, nullptr);
+    tree.appendChild (midiMap.toValueTree(), nullptr);
     if (userBankValid)
     {
         juce::MemoryBlock mb;
@@ -434,6 +442,11 @@ void ICX7Processor::setStateInformation (const void* data, int size)
     auto xml = getXmlFromBinary (data, size);
     if (xml == nullptr || ! xml->hasTagName (state.state.getType())) return;
     auto tree = juce::ValueTree::fromXml (*xml);
+    if (auto mm = tree.getChildWithName ("MIDIMAP"); mm.isValid())
+    {
+        midiMap.fromValueTree (mm);
+        tree.removeChild (mm, nullptr);
+    }
 
     userBankValid = false;
     juce::MemoryBlock mb;

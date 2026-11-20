@@ -24,6 +24,7 @@ KnobCell::KnobCell (ICX7Processor& p, const juce::String& id, const juce::String
     slider.setScrollWheelEnabled (true);
     slider.setColour (juce::Slider::thumbColourId, C::print);
     att = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (proc.state, id, slider);
+    mbstudio::midi::tag (*this, id);
     if (auto* prm = proc.state.getParameter (id))
         slider.setDoubleClickReturnValue (true, prm->convertFrom0to1 (prm->getDefaultValue()));
     slider.onValueChange = [this] { repaint(); if (onTouched) onTouched (*this); };
@@ -58,7 +59,8 @@ void KnobCell::paint (juce::Graphics& g)
 
 // ================================================================================================ pannello
 ICX7Panel::ICX7Panel (ICX7Processor& p)
-    : proc (p), keyboard (p.keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
+    : proc (p), keyboard (p.keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard),
+      midiButtons (p.midiMap), midiOverlay (p.midiMap)
 {
     // ---- operatori
     const struct { int field; int w; } cols[] = {
@@ -86,6 +88,7 @@ ICX7Panel::ICX7Panel (ICX7Processor& p)
             proc.setParamInt (onId, rows[(size_t) (op - 1)].onBtn.getToggleState() ? 1 : 0);
             repaint (algArea);
         };
+        mbstudio::midi::tag (row.onBtn, onId);
         addAndMakeVisible (row.onBtn);
 
         const auto modeId = opParamId (op, MODE);
@@ -97,6 +100,7 @@ ICX7Panel::ICX7Panel (ICX7Processor& p)
             updateButtons();
         };
         setupButton (row.modeBtn, C::ledBlue);
+        mbstudio::midi::tag (row.modeBtn, modeId);
         addAndMakeVisible (row.modeBtn);
     }
 
@@ -112,12 +116,14 @@ ICX7Panel::ICX7Panel (ICX7Processor& p)
 
     for (int i = 0; i < 6; ++i) waveBox.addItem (formatValue (Fmt::wave, i), i + 1);
     waveAtt = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (proc.state, "lfw", waveBox);
+    mbstudio::midi::tag (waveBox, "lfw");
     addAndMakeVisible (waveBox);
 
     for (auto [btn, id] : { std::pair { &oksBtn, "oks" }, { &lfoSyncBtn, "lfks" } })
     {
         setupButton (*btn, C::ledGreen);
         const juce::String pid (id);
+        mbstudio::midi::tag (*btn, pid);
         btn->onClick = [this, pid] { proc.setParamInt (pid, proc.paramInt (pid) ? 0 : 1); updateButtons(); };
         addAndMakeVisible (*btn);
     }
@@ -205,6 +211,8 @@ ICX7Panel::ICX7Panel (ICX7Processor& p)
     keyboard.setLowestVisibleKey (36);
     keyboard.setWantsKeyboardFocus (false);
     addAndMakeVisible (keyboard);
+    addAndMakeVisible (midiButtons);
+    addAndMakeVisible (midiOverlay);     // per ultimo: sopra a tutto
 
     juce::Component::SafePointer<ICX7Panel> safeThis (this);
     proc.onPatchChanged = [safeThis]
@@ -353,9 +361,10 @@ void ICX7Panel::resized()
 
     // tasti voce
     {
-        const float w = (float) (baseW - 28 - 31 * 4) / 32.f;
+        const float w = (float) (baseW - 28 - 220 - 31 * 4) / 32.f;
         for (int i = 0; i < 32; ++i)
             voiceBtn[i].setBounds ((int) (14 + i * (w + 4)), 124, (int) w, 30);
+        midiButtons.setBounds (baseW - 14 - 208, 124, 208, 30);
     }
 
     // colonna sinistra
@@ -399,6 +408,7 @@ void ICX7Panel::resized()
     }
 
     keyboard.setBounds (14, 800, baseW - 28, 66);
+    midiOverlay.setBounds (getLocalBounds());
     keyboard.setKeyWidth ((float) (baseW - 28) / 49.f);
 }
 

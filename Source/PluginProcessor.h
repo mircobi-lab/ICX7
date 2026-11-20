@@ -2,6 +2,7 @@
 #include "EngineHost.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_dsp/juce_dsp.h>
+#include "MBStudioMidi.h"
 
 // Coro stereo semplice (due linee di ritardo modulate in quadratura), stile ensemble anni '80.
 class StereoChorus
@@ -79,6 +80,7 @@ public:
 
     juce::AudioProcessorValueTreeState state;
     juce::MidiKeyboardState keyboardState;
+    mbstudio::midi::MidiMapper midiMap;               // MIDI Learn e profili controller
     std::function<void()> onPatchChanged;              // per l'editor (thread dei messaggi)
 
 private:
