@@ -142,6 +142,18 @@ pub unsafe extern "C" fn icx7_all_notes_off(e: *mut Icx7Engine) {
     }
 }
 
+/// MIDI panic: silence all voices at once (no release tail) and reset
+/// sustain, pitch bend, mod wheel and expression.
+///
+/// # Safety
+/// `e` must be valid.
+#[no_mangle]
+pub unsafe extern "C" fn icx7_panic(e: *mut Icx7Engine) {
+    if let Some(eng) = e.as_mut() {
+        guard((), || eng.synth.panic());
+    }
+}
+
 /// Render `frames` mono samples at 48000 Hz into `out` (range -1..1).
 /// On failure the buffer is zeroed.
 ///
@@ -310,6 +322,27 @@ mod tests {
             let peak = buf.iter().fold(0f32, |a, &x| a.max(x.abs()));
             assert!(peak > 0.01, "peak {peak}");
             icx7_all_notes_off(e);
+            icx7_destroy(e);
+        }
+    }
+
+    #[test]
+    fn panic_silences_immediately() {
+        unsafe {
+            let e = icx7_create(16);
+            let mut v = [0u8; 155];
+            icx7_rom1a_voice(0, v.as_mut_ptr());
+            icx7_load_voice(e, v.as_ptr());
+            icx7_control_change(e, 64, 127);
+            for n in 48..72 {
+                icx7_note_on(e, n, 120);
+            }
+            let mut buf = vec![0f32; 4800];
+            icx7_render(e, buf.as_mut_ptr(), 4800);
+            assert!(buf.iter().any(|x| x.abs() > 0.01));
+            icx7_panic(e);
+            icx7_render(e, buf.as_mut_ptr(), 4800);
+            assert!(buf.iter().all(|x| *x == 0.0), "audio after panic");
             icx7_destroy(e);
         }
     }

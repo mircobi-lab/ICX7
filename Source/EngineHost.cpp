@@ -42,6 +42,17 @@ void EngineHost::allNotesOff()
     keysDown = 0;
 }
 
+void EngineHost::panic()
+{
+    icx7_panic (engine);
+    std::fill (std::begin (held), std::end (held), false);
+    keysDown = 0;
+    // svuota anche il buffer del ricampionatore: niente code di suono già calcolato
+    std::fill (fifo.begin(), fifo.end(), 0.f);
+    fifoCount = 0;
+    interp.reset();
+}
+
 void EngineHost::handleMidi (const juce::MidiMessage& m)
 {
     if (m.isNoteOn())
@@ -58,7 +69,9 @@ void EngineHost::handleMidi (const juce::MidiMessage& m)
     }
     else if (m.isPitchWheel())
         icx7_pitch_bend (engine, (int16_t) (m.getPitchWheelValue() - 8192));
-    else if (m.isAllNotesOff() || m.isAllSoundOff() || m.isResetAllControllers())
+    else if (m.isAllSoundOff())       // CC 120: taglio immediato
+        panic();
+    else if (m.isAllNotesOff() || m.isResetAllControllers())
     {
         if (m.isResetAllControllers()) { icx7_control_change (engine, 1, 0); icx7_pitch_bend (engine, 0); }
         allNotesOff();

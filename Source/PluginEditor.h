@@ -49,7 +49,7 @@ private:
 
     juce::TextButton voiceBtn[32];
     juce::TextButton prevBtn { "<" }, nextBtn { ">" }, loadBtn { "LOAD SYX" }, saveBankBtn { "SAVE BANK" },
-                     saveVoiceBtn { "SAVE VOICE" }, storeBtn { "STORE" }, initBtn { "INIT" },
+                     saveVoiceBtn { "SAVE VOICE" }, storeBtn { "STORE" }, initBtn { "INIT" }, panicBtn { "PANIC" },
                      oksBtn { "KEY SYNC" }, lfoSyncBtn { "LFO SYNC" };
     juce::ComboBox bankBox, waveBox;
     juce::Label nameLabel;
@@ -60,7 +60,7 @@ private:
 
     juce::Rectangle<int> displayArea, algArea, pegArea, opHeaderArea;
     juce::String touched, status;
-    int statusTicks = 0;
+    int statusTicks = 0, panicFlash = 0;
     icx7::VoiceData shown {};
 
     KnobCell* addKnob (const juce::String& id, const juce::String& label, bool showLabel);

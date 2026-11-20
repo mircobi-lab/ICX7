@@ -118,7 +118,7 @@ bool ICX7Processor::isBusesLayoutSupported (const BusesLayout& layouts) const
 void ICX7Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     engine.prepare (sampleRate, samplesPerBlock);
-    engine.allNotesOff();
+    engine.panic();
     chorus.prepare (sampleRate);
     reverb.setSampleRate (sampleRate);
     reverb.reset();
@@ -147,6 +147,14 @@ void ICX7Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBu
     buffer.clear();
     keyboardState.processNextMidiBuffer (midi, 0, numSamples, true);
 
+    if (panicRequested.exchange (false))
+    {
+        engine.panic();
+        chorus.reset();
+        reverb.reset();
+        outLevel = 0;
+        ++panicsDone;
+    }
     if (voiceDirty.exchange (false))
         engine.loadVoice (voiceFromAtomics());
     const int bend = juce::roundToInt (pBend->load());

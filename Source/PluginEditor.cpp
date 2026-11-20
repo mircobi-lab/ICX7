@@ -170,7 +170,16 @@ ICX7Panel::ICX7Panel (ICX7Processor& p)
     };
     initBtn.setTooltip ("Voce iniziale: solo OP1, onda sinusoidale");
     initBtn.onClick = [this] { proc.initVoice(); showStatus ("INIT VOICE"); };
-    for (auto* b : { &prevBtn, &nextBtn, &loadBtn, &saveBankBtn, &saveVoiceBtn, &storeBtn, &initBtn }) addAndMakeVisible (*b);
+    panicBtn.setTooltip ("MIDI PANIC: spegne subito tutte le note, il sustain e le code di chorus e riverbero");
+    setupButton (panicBtn, C::ledRed);
+    panicBtn.onClick = [this]
+    {
+        proc.requestPanic();
+        proc.keyboardState.allNotesOff (0);
+        panicFlash = 15;
+        showStatus ("PANIC: TUTTE LE NOTE SPENTE");
+    };
+    for (auto* b : { &prevBtn, &nextBtn, &loadBtn, &saveBankBtn, &saveVoiceBtn, &storeBtn, &initBtn, &panicBtn }) addAndMakeVisible (*b);
 
     nameLabel.setEditable (false, true, false);
     nameLabel.setFont (ui::Fonts::display (30.f));
@@ -304,6 +313,8 @@ void ICX7Panel::timerCallback()
 {
     meter.setLevel (std::pow (juce::jmin (1.f, proc.outputLevel()), .5f));
     if (statusTicks > 0 && --statusTicks == 0) { status.clear(); repaint (displayArea); }
+    if (panicFlash > 0) --panicFlash;
+    panicBtn.setToggleState (panicFlash > 0 && (panicFlash / 3) % 2 == 0, juce::dontSendNotification);
 
     // ridisegna schemi e inviluppi solo quando la voce cambia
     VoiceData v {};
@@ -329,6 +340,7 @@ void ICX7Panel::resized()
     prevBtn.setBounds (992, 16, 40, 28);
     nextBtn.setBounds (1036, 16, 40, 28);
     initBtn.setBounds (1082, 16, 70, 28);
+    panicBtn.setBounds (1170, 16, 86, 28);
     loadBtn.setBounds (866, 58, 92, 30);
     saveBankBtn.setBounds (962, 58, 96, 30);
     saveVoiceBtn.setBounds (1062, 58, 104, 30);

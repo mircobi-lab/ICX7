@@ -411,6 +411,24 @@ impl Synth {
         }
     }
 
+    /// MIDI panic (added for ICX7): silence every voice immediately, drop
+    /// pending notes, buffered residue, sustain, pitch bend and mod wheel.
+    pub fn panic(&mut self) {
+        for voice in &mut self.voices {
+            voice.note_off();
+            voice.sustain_held = false;
+            voice.fading = false;
+            voice.state = VoiceState::Inactive;
+        }
+        self.pending_notes.clear();
+        self.sustain = false;
+        self.mod_wheel = 0;
+        self.expression = 1.0;
+        self.pitch_bend(0);
+        self.stereo_residue_len = 0;
+        self.mono_residue_len = 0;
+    }
+
     /// Allocate a voice slot using priority: inactive > oldest released > oldest active.
     fn allocate_voice(&mut self) -> usize {
         // 1. Find an inactive voice

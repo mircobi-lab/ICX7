@@ -21,6 +21,7 @@ public:
     void loadVoice (const VoiceData&);
     void handleMidi (const juce::MidiMessage&);
     void allNotesOff();
+    void panic();                                      // silenzio immediato, controller azzerati
     void setBendRange (int semitones);
     void render (float* out, int numSamples);          // mono, alla frequenza dell'host
 

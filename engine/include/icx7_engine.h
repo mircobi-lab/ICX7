@@ -21,6 +21,7 @@ void        icx7_control_change (Icx7Engine*, uint8_t cc, uint8_t value);
 void        icx7_pitch_bend (Icx7Engine*, int16_t value);
 void        icx7_set_bend_range (Icx7Engine*, uint8_t semitones);
 void        icx7_all_notes_off (Icx7Engine*);
+void        icx7_panic (Icx7Engine*);          /* silenzio immediato + reset dei controller */
 void        icx7_render (Icx7Engine*, float* out, uint32_t frames);
 
 uint32_t    icx7_parse_sysex (const uint8_t* data, size_t len, uint8_t* out32x155);

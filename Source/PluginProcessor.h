@@ -9,6 +9,7 @@ class StereoChorus
 public:
     void prepare (double sr);
     void process (float* l, float* r, int n, float mix);
+    void reset() { std::fill (buf.begin(), buf.end(), 0.f); }
 private:
     std::vector<float> buf;
     int pos = 0;
@@ -69,6 +70,10 @@ public:
     int paramInt (const juce::String& id) const;
     void setParamInt (const juce::String& id, int v);
 
+    // MIDI PANIC: chiamabile da qualsiasi thread, eseguito all'inizio del blocco audio successivo
+    void requestPanic() noexcept { panicRequested = true; }
+    int panicCount() const noexcept { return panicsDone.load(); }
+
     float outputLevel() const noexcept { return outLevel.load(); }
     int keysDown() const noexcept { return keys.load(); }
 
@@ -103,6 +108,8 @@ private:
     std::array<uint8_t, 4200> sysexBuf {};
     std::atomic<int> sysexSize { 0 };
 
+    std::atomic<bool> panicRequested { false };
+    std::atomic<int> panicsDone { 0 };
     std::atomic<float> outLevel { 0 };
     std::atomic<int> keys { 0 };
 

@@ -31,6 +31,7 @@ xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/"MBStudio91 ICX7.vs
 - 8 banchi di fabbrica (ROM1A … ROM4B, 256 voci) e 32 tasti di selezione come la membrana del DX7
 - LOAD SYX: banchi da 32 voci o voci singole DX7; SAVE BANK e SAVE VOICE scrivono SysEx compatibili DX7/Dexed
 - STORE: memorizza la voce modificata nel banco USER (salvato insieme al progetto del DAW)
+- PANIC: spegne subito tutte le note (senza coda), sustain, pitch bend, modulazione, chorus e riverbero; lo fa anche il CC 120 All Sound Off
 - ricezione MIDI di Program Change e di SysEx DX7 (banco o voce singola)
 - mod wheel, breath (CC2), foot (CC4) e aftertouch sulla modulazione LFO; sustain; pitch bend (BEND 0-12 semitoni, anche via RPN 0)
 - uscita con VOLUME, CHORUS stereo e REVERB (spenti per default: suono "puro" del motore)
@@ -40,7 +41,7 @@ Nota: come sul DX7, le modifiche alla voce valgono per le note suonate dopo la m
 ## Come funziona dentro
 
 ```
-engine/dx7-core    motore originale (Rust, Apache 2.0, copia del commit 72f0d5a)
+engine/dx7-core    motore originale (Rust, Apache 2.0, copia del commit 72f0d5a; unica modifica: Synth::panic)
 engine/icx7-ffi    ponte C (libreria statica icx7_engine)  ->  engine/include/icx7_engine.h
 Source/            plugin JUCE: parametri, banchi, interfaccia
 MBStudioUI/        kit grafico hardware MBStudio91
