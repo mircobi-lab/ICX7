@@ -84,7 +84,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: "*.zip"
+          path: "ICX7-*.zip"
 
   release:
     name: Pubblica in Releases
@@ -117,4 +117,4 @@ jobs:
             **Windows** (64 bit)
             - ICX7-VST3-win.zip: estrai e copia la cartella "MBStudio91 ICX7.vst3" in C:\Program Files\Common Files\VST3\
             - ICX7-App-win.zip: versione autonoma (MBStudio91 ICX7.exe)
-          files: dist/*.zip
+          files: dist/ICX7-*.zip
